@@ -232,12 +232,11 @@ blockchainTests.resets('WSClient', env => {
             it('should receive subscription updates', (done: DoneCallback) => {
                 (async () => {
                     const expectToBeCalledOnce = true;
-                    const callback = callbackErrorReporter.reportNoErrorCallbackErrors(
-                        done,
-                        expectToBeCalledOnce,
-                    )(async (ack: string) => {
-                        expect(ack).to.be.equal('tick');
-                    });
+                    const callback = callbackErrorReporter.reportNoErrorCallbackErrors(done, expectToBeCalledOnce)(
+                        async (ack: string) => {
+                            expect(ack).to.be.equal('tick');
+                        },
+                    );
                     await (deployment.client as any)._subscribeToHeartbeatAsync(callback);
                 })().catch(done);
             });
@@ -445,10 +444,11 @@ blockchainTests.resets('WSClient', env => {
                                     }
                                 `;
                                 connection.sendUTF(response);
-                                numMessages++;
-                                return;
                             }
-                            numMessages++;
+                            if (++numMessages > 2) {
+                                // NOTE(jalextowle): This log is here to help debug intermittent failures in CI.
+                                console.log('extra message', message); // tslint:disable-line:no-console
+                            }
                         }) as any);
                     }) as any);
 
